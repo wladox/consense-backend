@@ -22,10 +22,9 @@ public class JdbcContextRepository implements ContextRepository {
 	
 	@Override
 	public void addContextStateItem(ContextItem item) {
-
-		String sql = "INSERT INTO context.context_state (type, params, created) VALUES (?,?,?);";
-		
-		jdbcTemplate.update(sql, item.getType(), item.getParams().toString(), item.getCreated());
+		String sql = "INSERT INTO context.context_state (type, user_id, created, params ) VALUES (?,?,?,?);";
+		System.out.println(item.getParams().toString());
+		jdbcTemplate.update(sql, item.getType(), item.getUserId(), item.getCreated(), item.getParams().toString());
 	}
 
 }

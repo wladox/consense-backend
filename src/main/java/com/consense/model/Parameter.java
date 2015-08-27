@@ -1,8 +1,21 @@
 package com.consense.model;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+@XmlRootElement
 public class Parameter {
 
+	@XmlElement
 	private String name;
+	
+	@XmlElement
+	private String type;
+	
+	@XmlElement
 	private String value;
 	
 	public Parameter() {}
@@ -13,6 +26,15 @@ public class Parameter {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+	
 	public String getValue() {
 		return value;
 	}
@@ -22,7 +44,16 @@ public class Parameter {
 	
 	@Override
 	public String toString() {
-		return "name="+getName()+"&value="+getValue();
+		JSONObject param = new JSONObject();
+        try {
+            param.put("name", getName());
+            param.put("type", getType());
+            param.put("value", getValue());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return param.toString();
 	}
 	
 }

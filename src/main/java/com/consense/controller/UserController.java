@@ -34,10 +34,10 @@ public class UserController {
 		this.userManager = userManager;
 	}
 	
-//	@Autowired
-//	public void setAccessControlManager(AccessControlManagementService accessControlManager) {
-//		this.accessControlManager = accessControlManager;
-//	}
+	@Autowired
+	public void setAccessControlManager(AccessControlManagementService accessControlManager) {
+		this.accessControlManager = accessControlManager;
+	}
 
 	
 	//request mappings
