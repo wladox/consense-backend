@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 
 import com.consense.model.Geofence;
 import com.consense.model.User;
-import com.consense.model.UserFeature;
 
 @Repository
 public class JdbcGeofenceRepository implements GeofenceRepository {
