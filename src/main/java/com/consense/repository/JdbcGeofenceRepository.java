@@ -83,8 +83,6 @@ public class JdbcGeofenceRepository implements GeofenceRepository {
 
 	@Override
 	public boolean isUserInGeofence(Integer userId, Integer geofenceId) {
-		
-		
 		return false;
 	}
 
