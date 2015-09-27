@@ -1,4 +1,4 @@
-package com.consense.model;
+package com.consense.model.context;
 
 import java.util.Date;
 import java.util.List;
@@ -8,8 +8,32 @@ public class ContextItem {
 	private Integer itemId;
 	private Integer userId;
 	private String 	type;
-	private List<Parameter> params;
+//	private List<Parameter> params;
+	private String params;
 	private Date created;
+	
+	public enum ContextType {
+		
+		ACTIVITY(1), APPS(2), LOCATION(3);
+		
+		private int id;
+		
+		private ContextType(int id) {
+			this.id = id;
+		}
+		
+		public int getId() {
+			return id;
+		}
+
+		public static String getValueById(int id) {
+			for (ContextType ct : ContextType.values())	{
+				if (ct.getId() == id)
+					return ct.toString();
+			}
+			return "";
+		}
+	}
 	
 	public Integer getItemId() {
 		return itemId;
@@ -35,12 +59,19 @@ public class ContextItem {
 	public void setCreated(Date created) {
 		this.created = created;
 	}
-	public List<Parameter> getParams() {
+//	public List<Parameter> getParams() {
+//		return params;
+//	}
+//	public void setParams(List<Parameter> params) {
+//		this.params = params;
+//	}
+	public String getParams() {
 		return params;
 	}
-	public void setParams(List<Parameter> params) {
+	public void setParams(String params) {
 		this.params = params;
 	}
+
 
 	
 }

@@ -1,8 +1,13 @@
 package com.consense.repository;
 
-import com.consense.model.ContextItem;
+import java.util.Date;
+import java.util.List;
+
+import com.consense.model.context.ContextItem;
 
 public interface ContextRepository {
 
-	void addContextStateItem(ContextItem item);
+	void addContextItem(ContextItem item);
+	List<ContextItem> getContextOfUser(Integer userId, Integer contextType, Date from, Date to);
+	
 }

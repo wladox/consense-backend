@@ -1,5 +1,6 @@
 package com.consense.service;
 
+import java.io.File;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,7 @@ import com.consense.model.UserFeature;
 import com.consense.repository.UserRepository;
 
 @Service
-public class UserManagementServiceImpl implements UserManagementService {
+public class UserManager implements IUserManager {
 
 	private UserRepository userRepository;
 
@@ -20,11 +21,11 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public Integer authenticateUser(User user) {
+	public User authenticateUser(User user) {
 
 		User existingUser = userRepository.findUserByEmail(user.getEmail());
-		if (user.getPassword().equals(existingUser.getPassword())) {
-			return existingUser.getUserId();
+		if (existingUser != null && user.getPassword().equals(existingUser.getPassword())) {
+			return existingUser;
 		}
 		return null;
 	}
@@ -54,6 +55,20 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public void addUserFeature(Integer userId, UserFeature feature) {
 		userRepository.addUserFeature(userId, feature);
+	}
+
+	@Override
+	public String setUserImage(Integer userId, String filepath) {
+		String result = userRepository.setUserImage(userId, filepath);
+		return result;
+	}
+
+	@Override
+	public File getUserImage(Integer userId) {
+		User user = userRepository.findUserById(userId);
+		if (user.getImage() != null && !user.getImage().equals(""))
+			return new File(user.getImage());
+		return null;
 	}
 
 }

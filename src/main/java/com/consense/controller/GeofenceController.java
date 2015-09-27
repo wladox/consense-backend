@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.consense.model.Geofence;
 import com.consense.model.User;
-import com.consense.service.GeofenceManagementService;
+import com.consense.service.IGeofenceManager;
 
 @RestController("geofenceController")
 @RequestMapping("/geofence")
 public class GeofenceController {
 	
-	private GeofenceManagementService geofenceManagementService;
+	private IGeofenceManager geofenceManagementService;
 
 	@Autowired
-	public void setGeofenceManagementService(GeofenceManagementService geofenceManagementService) {
+	public void setGeofenceManagementService(IGeofenceManager geofenceManagementService) {
 		this.geofenceManagementService = geofenceManagementService;
 	}
 	

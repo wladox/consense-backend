@@ -40,6 +40,11 @@ public class JdbcUserRepository implements UserRepository {
 				user.setUserId(rs.getInt("id"));
 				user.setUsername(rs.getString("username"));
 				user.setEmail(rs.getString("email"));
+				user.setBirthday(rs.getDate("birthday"));
+				user.setSex(rs.getString("sex"));
+				user.setName(rs.getString("name"));
+				user.setSurname(rs.getString("surname"));
+				user.setImage(rs.getString("image"));
 				return user;
 			}
 		});
@@ -52,12 +57,18 @@ public class JdbcUserRepository implements UserRepository {
 		return jdbcTemplate.query(sql, new ResultSetExtractor<User>() {
 
 			@Override
-			public User extractData(ResultSet rs) throws SQLException, DataAccessException {
+			public User extractData(ResultSet rs) throws SQLException {
 				if (rs.next()) {
 					User user = new User();
-					user.setUserId(rs.getInt("id"));
-					user.setUsername(rs.getString("username"));
-					user.setEmail(rs.getString("email"));
+					user.setUserId(rs.getInt(User.COLUMN_USER_ID));
+					user.setUsername(rs.getString(User.COLUMN_USERNAME));
+					user.setEmail(rs.getString(User.COLUMN_EMAIL));
+					user.setPassword(rs.getString(User.COLUMN_PASSWORD));
+					user.setName(rs.getString(User.COLUMN_NAME));
+					user.setSurname(rs.getString(User.COLUMN_SURNAME));
+					user.setBirthday(rs.getDate(User.COLUMN_BIRTHDAY));
+					user.setSex(rs.getString(User.COLUMN_SEX));
+					user.setImage(rs.getString("image"));
 					return user;
 				}
 				return null;
@@ -73,7 +84,7 @@ public class JdbcUserRepository implements UserRepository {
 	        jdbcTemplate.update(sql, newUser.getEmail(), newUser.getPassword(), newUser.getUserId());
 	    } else {
 	        // insert
-	        String sql = "INSERT INTO network.user ("+User.COLUMN_NAME+", "+User.COLUMN_EMAIL+", "+User.COLUMN_PASSWORD+") VALUES (?, ?, ?)";
+	        String sql = "INSERT INTO network.user ("+User.COLUMN_USERNAME+", "+User.COLUMN_EMAIL+", "+User.COLUMN_PASSWORD+") VALUES (?, ?, ?)";
 	        jdbcTemplate.update(sql, newUser.getUsername(), newUser.getEmail(), newUser.getPassword());
 	    }
 	}
@@ -87,9 +98,13 @@ public class JdbcUserRepository implements UserRepository {
 			public User extractData(ResultSet rs) throws SQLException, DataAccessException {
 				if (rs.next()) {
 					User user = new User();
-					user.setUserId(rs.getInt("id"));
-					user.setUsername(rs.getString("username"));
-					user.setEmail(rs.getString("email"));
+					user.setUserId(rs.getInt(User.COLUMN_USER_ID));
+					user.setUsername(rs.getString(User.COLUMN_USERNAME));
+					user.setEmail(rs.getString(User.COLUMN_EMAIL));
+					user.setPassword(rs.getString(User.COLUMN_PASSWORD));
+					user.setName(rs.getString(User.COLUMN_NAME));
+					user.setSurname(rs.getString(User.COLUMN_SURNAME));
+					user.setBirthday(rs.getDate(User.COLUMN_BIRTHDAY));
 					return user;
 				}
 				return null;
@@ -106,10 +121,13 @@ public class JdbcUserRepository implements UserRepository {
 			public User extractData(ResultSet rs) throws SQLException, DataAccessException {
 				if (rs.next()) {
 					User user = new User();
-					user.setUserId(rs.getInt("id"));
-					user.setUsername(rs.getString("username"));
-					user.setEmail(rs.getString("email"));
-					user.setPassword(rs.getString("password"));
+					user.setUserId(rs.getInt(User.COLUMN_USER_ID));
+					user.setUsername(rs.getString(User.COLUMN_USERNAME));
+					user.setEmail(rs.getString(User.COLUMN_EMAIL));
+					user.setPassword(rs.getString(User.COLUMN_PASSWORD));
+					user.setName(rs.getString(User.COLUMN_NAME));
+					user.setSurname(rs.getString(User.COLUMN_SURNAME));
+					user.setBirthday(rs.getDate(User.COLUMN_BIRTHDAY));
 					return user;
 				}
 				return null;
@@ -171,6 +189,15 @@ public class JdbcUserRepository implements UserRepository {
 			int rows = jdbcTemplate.update(sql2, featureId, userId);
 		}
 		
+	}
+
+	@Override
+	public String setUserImage(Integer userId, String filepath) {
+		String sql = "update network.user set image = ? where id = ?";
+		int rows = jdbcTemplate.update(sql, filepath, userId);
+		if (rows == 1) 
+			return "User image successfully updated";
+		return "";
 	}
 	
 	

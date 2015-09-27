@@ -1,6 +1,7 @@
 package com.consense.model;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,9 +11,11 @@ public class User {
 	public static final String SCHEMA = "network";
 	public static final String TABLE_NAME = "user";
 	
-	public static final String COLUMN_USER_ID = "id";
-	public static final String COLUMN_NAME		= "username";
+	public static final String COLUMN_USER_ID 	= "id";
+	public static final String COLUMN_USERNAME	= "username";
 	public static final String COLUMN_EMAIL		= "email";
+	public static final String COLUMN_NAME		= "name";
+	public static final String COLUMN_SURNAME	= "surname";
 	public static final String COLUMN_PASSWORD 	= "password";
 	public static final String COLUMN_BIRTHDAY	= "birthday";
 	public static final String COLUMN_SEX		= "sex";
@@ -21,14 +24,17 @@ public class User {
 	private Integer userId;
 	private String 	username;
 	private String 	email;
+	private String 	name;
+	private String	surname;
 	
-	@JsonIgnore
 	private String 	password;
 	
 	private Date 	birthday;
 	private String 	sex;
 	private String	image;
 	private List<UserFeature> features;
+	
+	private HashMap<Integer, Integer> accessRules;
 	
 	public User() {
 		
@@ -59,6 +65,22 @@ public class User {
 	}
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getSurname() {
+		return surname;
+	}
+
+	public void setSurname(String surname) {
+		this.surname = surname;
 	}
 
 	public String getPassword() {
@@ -92,6 +114,15 @@ public class User {
 	public void setFeatures(List<UserFeature> features) {
 		this.features = features;
 	}
+
+	public HashMap<Integer, Integer> getAccessRules() {
+		return accessRules;
+	}
+
+	public void setAccessRules(HashMap<Integer, Integer> accessRules) {
+		this.accessRules = accessRules;
+	}
+	
 	
 	
 	

@@ -52,7 +52,8 @@ public class JdbcGeofenceRepository implements GeofenceRepository {
 							+ Geofence.COLUMN_NAME + ","
 							+ Geofence.COLUMN_DURATION + ","
 							+ Geofence.COLUMN_RADIUS + ","
-							+ Geofence.COLUMN_CREATED
+							+ Geofence.COLUMN_CREATED + ","
+							+ "ST_x(geom) AS lat, ST_y(geom) AS long"
 							+ " FROM "+ Geofence.SCHEMA +"."+ Geofence.TABLE_NAME 
 				+ " ORDER BY geom <-> ST_MakePoint(?,?) LIMIT 10;";
 		
@@ -71,6 +72,8 @@ public class JdbcGeofenceRepository implements GeofenceRepository {
 					geofence.setDuration(rs.getLong(Geofence.COLUMN_DURATION));
 					geofence.setRadius(rs.getInt(Geofence.COLUMN_RADIUS));
 					geofence.setCreated(rs.getDate(Geofence.COLUMN_CREATED));
+					geofence.setLatitude(rs.getDouble(Geofence.COLUMN_LAT));
+					geofence.setLongitude(rs.getDouble(Geofence.COLUMN_LONG));
 					geofences.add(geofence);
 				}
 				return geofences;
@@ -87,7 +90,7 @@ public class JdbcGeofenceRepository implements GeofenceRepository {
 
 	@Override
 	public List<User> findAllUsersInGeofence(Integer geofenceId) {
-		String sql = "SELECT id, username, email, birthday FROM " + User.SCHEMA + "." + User.TABLE_NAME 
+		String sql = "SELECT id, username, email, name, surname, birthday FROM " + User.SCHEMA + "." + User.TABLE_NAME 
 				+ " JOIN geo.user_geofence ug ON geofence_id = ? AND ug.user_id = id";
 		
 		Integer[] args = {geofenceId};
@@ -102,6 +105,8 @@ public class JdbcGeofenceRepository implements GeofenceRepository {
 					user.setUserId(rs.getInt(User.COLUMN_USER_ID));
 					user.setUsername(rs.getString(User.COLUMN_NAME));
 					user.setEmail(rs.getString(User.COLUMN_EMAIL));
+					user.setName(rs.getString(User.COLUMN_NAME));
+					user.setSurname(rs.getString(User.COLUMN_SURNAME));
 					user.setBirthday(rs.getDate(User.COLUMN_BIRTHDAY));
 					users.add(user);
 				}

@@ -12,6 +12,8 @@ public class Geofence {
 	public static final String COLUMN_RADIUS 	= "radius";
 	public static final String COLUMN_DURATION 	= "duration";
 	public static final String COLUMN_CREATED 	= "created";
+	public static final String COLUMN_LAT 		= "lat";
+	public static final String COLUMN_LONG 		= "long";
 
 	private Integer geofenceId;
 	private String 	name;

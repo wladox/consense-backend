@@ -15,14 +15,14 @@ public interface UserRepository {
 	
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	void addUser(User user);
-	
+
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	User findUserByName(String name);
-	
 	User findUserByEmail(String email);
 	
 	List<UserFeature> findFeaturesOfUser(Integer userId);
 	
 	void updateUserFeature(UserFeature feature);
 	void addUserFeature(Integer userId, UserFeature feature);
+	String setUserImage(Integer userId, String filepath);
 }

@@ -11,7 +11,7 @@ import com.consense.model.User;
 import com.consense.repository.GeofenceRepository;
 
 @Service
-public class GeofenceManagementServiceImpl implements GeofenceManagementService {
+public class GeofenceManager implements IGeofenceManager {
 
 	private GeofenceRepository geofenceRepository;
 	
