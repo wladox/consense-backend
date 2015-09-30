@@ -17,7 +17,7 @@ public interface IAccessControlManager {
 	ConsensePermission getPermission(Integer permissionId);
 	boolean roleContainsPermission(Integer roleId, Integer permissionId);
 	void removeUserAssignment(Integer userId, Integer roleId);
-	
+	void setUserAccessLevel(Integer userId, Integer categoryId, Integer lvl);
 	SocialRelationship findSocialRelationship(Integer user1Id, Integer user2Id); 
 	
 	List<UserFeature> getUserProfile(Integer requesterId, Integer userId);

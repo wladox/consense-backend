@@ -1,39 +1,53 @@
 package com.consense.model.context;
 
 import java.util.Date;
-import java.util.List;
 
 public class ContextItem {
 
+	public static final int TYPE_ACTIVITY = 1;
+	public static final int TYPE_APPS = 2;
+	public static final int TYPE_LOCATION = 3;
+	public static final int TYPE_MUSIC = 4;
+	public static final int TYPE_AUDIO = 5;
+	public static final int TYPE_PEDOMETER = 6;
+	
+	
+	public static final String COLUMN_ID 		= "id";
+	public static final String COLUMN_TYPE 		= "type";
+	public static final String COLUMN_USER_ID 	= "user_id";
+	public static final String COLUMN_CREATED 	= "created";
+	
 	private Integer itemId;
 	private Integer userId;
-	private String 	type;
-//	private List<Parameter> params;
-	private String params;
+	private Integer	type;
 	private Date created;
 	
-	public enum ContextType {
+	public ContextItem() {
 		
-		ACTIVITY(1), APPS(2), LOCATION(3);
-		
-		private int id;
-		
-		private ContextType(int id) {
-			this.id = id;
-		}
-		
-		public int getId() {
-			return id;
-		}
-
-		public static String getValueById(int id) {
-			for (ContextType ct : ContextType.values())	{
-				if (ct.getId() == id)
-					return ct.toString();
-			}
-			return "";
-		}
 	}
+	
+//	public enum ContextType {
+//		
+//		ACTIVITY(1), APPS(2), LOCATION(3), MUSIC(4), AUDIO(5), PEDOMETER(6);
+//		
+//		private int id;
+//		
+//		private ContextType(int id) {
+//			this.id = id;
+//		}
+//		
+//		public int getId() {
+//			return id;
+//		}
+//
+//		public static String getValueById(int id) {
+//			for (ContextType ct : ContextType.values())	{
+//				if (ct.getId() == id)
+//					return ct.toString();
+//			}
+//			return "";
+//		}
+//	}
 	
 	public Integer getItemId() {
 		return itemId;
@@ -41,10 +55,10 @@ public class ContextItem {
 	public void setItemId(Integer itemId) {
 		this.itemId = itemId;
 	}
-	public String getType() {
+	public Integer getType() {
 		return type;
 	}
-	public void setType(String type) {
+	public void setType(Integer type) {
 		this.type = type;
 	}
 	public Integer getUserId() {
@@ -59,19 +73,6 @@ public class ContextItem {
 	public void setCreated(Date created) {
 		this.created = created;
 	}
-//	public List<Parameter> getParams() {
-//		return params;
-//	}
-//	public void setParams(List<Parameter> params) {
-//		this.params = params;
-//	}
-	public String getParams() {
-		return params;
-	}
-	public void setParams(String params) {
-		this.params = params;
-	}
-
 
 	
 }

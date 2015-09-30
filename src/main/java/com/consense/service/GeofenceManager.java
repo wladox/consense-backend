@@ -40,4 +40,14 @@ public class GeofenceManager implements IGeofenceManager {
 		return new ArrayList<User>();
 	}
 
+	@Override
+	public int addUser2Geofence(Integer userId, Integer geofenceId) {
+		return geofenceRepository.addUser2Geofence(userId, geofenceId);
+	}
+
+	@Override
+	public int removeUserFromGeofence(Integer userId, Integer geofenceId) {
+		return geofenceRepository.removeUserFromGeofence(userId, geofenceId);
+	}
+
 }

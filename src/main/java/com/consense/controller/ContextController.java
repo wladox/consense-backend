@@ -1,5 +1,6 @@
 package com.consense.controller;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,9 +27,11 @@ public class ContextController {
 		contextManager.addContext(item);
 	}
 	
-	@RequestMapping(value = "/set", method = RequestMethod.POST)
-	public void updateUserContext(@RequestParam(value="userId") String userId, @RequestParam(value="context") String json) {
-		contextManager.updateUserContext(Integer.parseInt(userId), json);
+	@RequestMapping(value = "/set", method = RequestMethod.POST) //@RequestParam(value="userId") Integer userId, @RequestParam(value="context") String json
+	public void updateUserContext(@RequestBody String json) {
+		JSONObject object = new JSONObject(json);
+		
+		contextManager.updateUserContext(object.getInt("userId"), object.getJSONArray("context"));
 	}
 	
 	

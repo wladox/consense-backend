@@ -14,7 +14,7 @@ public interface UserRepository {
 	User findUserById(Integer id);
 	
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	void addUser(User user);
+	int addUser(User user);
 
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	User findUserByName(String name);
@@ -25,4 +25,6 @@ public interface UserRepository {
 	void updateUserFeature(UserFeature feature);
 	void addUserFeature(Integer userId, UserFeature feature);
 	String setUserImage(Integer userId, String filepath);
+	
+	List<User> getUsersInGeofence(Integer userId);
 }

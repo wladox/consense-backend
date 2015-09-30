@@ -203,4 +203,12 @@ public class JdbcACRepository implements ACRepository {
 		});
 	}
 
+	@Override
+	public void setAccessRuleOfUser(Integer userId, Integer categoryId, Integer lvl) {
+
+		String sql = "UPDATE network.user_access_rules SET access_level = ? WHERE user_id = ? AND category_id = ?";
+		jdbcTemplate.update(sql, lvl, userId, categoryId);
+		
+	}
+
 }

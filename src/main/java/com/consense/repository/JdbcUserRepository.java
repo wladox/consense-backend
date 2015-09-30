@@ -76,17 +76,17 @@ public class JdbcUserRepository implements UserRepository {
 		});
 	}
 
-	public void addUser(User newUser) {
+	public int addUser(User newUser) {
 
-		if (newUser.getUserId() > 0) {
-	        // update
-	        String sql = "UPDATE network.user SET "+ User.COLUMN_EMAIL +"=?, " + User.COLUMN_PASSWORD + "=? WHERE id=?";
-	        jdbcTemplate.update(sql, newUser.getEmail(), newUser.getPassword(), newUser.getUserId());
-	    } else {
+//		if (newUser.getUserId() > 0) {
+//	        // update
+//	        String sql = "UPDATE network.user SET "+ User.COLUMN_EMAIL +"=?, " + User.COLUMN_PASSWORD + "=? WHERE id=?";
+//	        jdbcTemplate.update(sql, newUser.getEmail(), newUser.getPassword(), newUser.getUserId());
+//	    } else {
 	        // insert
-	        String sql = "INSERT INTO network.user ("+User.COLUMN_USERNAME+", "+User.COLUMN_EMAIL+", "+User.COLUMN_PASSWORD+") VALUES (?, ?, ?)";
-	        jdbcTemplate.update(sql, newUser.getUsername(), newUser.getEmail(), newUser.getPassword());
-	    }
+	        String sql = "INSERT INTO network.user ("+User.COLUMN_USERNAME+", " + User.COLUMN_NAME + ", " + User.COLUMN_SURNAME + ", "+User.COLUMN_EMAIL+", "+User.COLUMN_PASSWORD+") VALUES (?, ?, ?, ?, ?)";
+	        return jdbcTemplate.update(sql, newUser.getName(), newUser.getName(), newUser.getSurname(), newUser.getEmail(), newUser.getPassword());
+//	    }
 	}
 
 	@Override
@@ -198,6 +198,36 @@ public class JdbcUserRepository implements UserRepository {
 		if (rows == 1) 
 			return "User image successfully updated";
 		return "";
+	}
+
+	@Override
+	public List<User> getUsersInGeofence(Integer userId) {
+		
+		String sql = "SELECT * FROM network.user WHERE id = any("
+				+ "SELECT DISTINCT user_id FROM geo.user_geofence WHERE geofence_id = ANY("
+				+ "SELECT geofence_id FROM geo.user_geofence WHERE user_id = ?) AND user_id != ?);";
+		List<User> userList = jdbcTemplate.query(sql, new ResultSetExtractor<List<User>>() {
+
+			@Override
+			public List<User> extractData(ResultSet rs) throws SQLException, DataAccessException {
+				List<User> resultList = new ArrayList<>();
+				while(rs.next()) {
+					User user = new User();
+					user.setUserId(rs.getInt(User.COLUMN_USER_ID));
+					user.setUsername(rs.getString(User.COLUMN_USERNAME));
+					user.setEmail(rs.getString(User.COLUMN_EMAIL));
+					user.setPassword(rs.getString(User.COLUMN_PASSWORD));
+					user.setName(rs.getString(User.COLUMN_NAME));
+					user.setSurname(rs.getString(User.COLUMN_SURNAME));
+					user.setBirthday(rs.getDate(User.COLUMN_BIRTHDAY));
+					resultList.add(user);
+				}
+				return resultList;
+			}
+			
+		}, userId, userId);
+		
+		return userList;
 	}
 	
 	

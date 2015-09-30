@@ -9,7 +9,13 @@ import com.consense.model.SocialRelationship;
 
 public interface ACRepository {
 
+	/**
+	 * 
+	 * @param userId of the requested profile's owner
+	 * @return Hashmap containing category ids as key and access level as value
+	 */
 	HashMap<Integer, Integer> getAccessRulesOfUser(Integer userId);
+	void setAccessRuleOfUser(Integer userId, Integer categoryId, Integer lvl);
 	
 	void addUserAssignment(Integer userId, Integer roleId);
 	List<Integer> getUserAssignments(Integer userId);

@@ -6,6 +6,10 @@ public class ConsensePermission {
 	private String 	name;
 	private Integer categoryId;
 	
+	public enum PermissionName {
+		MUSIC, EDUCATION, SPORT, FOOD, ACTIVITY, APPS, CONTACTS, EVENTS
+	}
+	
 	public ConsensePermission() {
 		
 	}

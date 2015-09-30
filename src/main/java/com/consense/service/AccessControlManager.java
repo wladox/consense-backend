@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.consense.access.ConsensePermission;
+import com.consense.access.ConsensePermission.PermissionName;
 import com.consense.access.ConsenseRole;
 import com.consense.model.SocialRelationship;
 import com.consense.model.UserFeature;
 import com.consense.model.context.ContextItem;
-import com.consense.model.context.ContextItem.ContextType;
 import com.consense.model.context.ContextItemFilter;
 import com.consense.repository.ACRepository;
 
@@ -93,13 +93,19 @@ public class AccessControlManager implements IAccessControlManager {
 	@Override
 	public List<UserFeature> getUserProfile(Integer requesterId, Integer userId) {
 
+		ContextItemFilter filter = new ContextItemFilter();
+		Calendar c = Calendar.getInstance();
+		
+		filter.setTo(c.getTime());
+		c.add(Calendar.DAY_OF_YEAR, -7);
+		filter.setFrom(c.getTime());
+		
 		SocialRelationship sr = findSocialRelationship(requesterId, userId);
 		if (sr != null) {
 			//Key: categoryId, Value: Access LvL
 			HashMap<Integer, Integer> accRules = accessControlRepository.getAccessRulesOfUser(userId);
 			ConsenseRole newRole = new ConsenseRole();
 			List<ConsensePermission> permissionsList = new ArrayList<>();
-			Calendar c = Calendar.getInstance();
 			
 			for (Integer categoryId : accRules.keySet()) {
 				switch(accRules.get(categoryId)) {
@@ -112,11 +118,9 @@ public class AccessControlManager implements IAccessControlManager {
 					
 //					List<ContextItem> requesterContext 	= contextManager.get(requesterId);
 					
-					ContextItemFilter filter = new ContextItemFilter();
 					filter.setTo(c.getTime());
 					c.add(Calendar.DAY_OF_YEAR, -7);
 					filter.setFrom(c.getTime());
-					filter.setType(ContextType.APPS);
 					
 					List<ContextItem> userContext 		= contextManager.getContextItems(userId, filter);
 					
@@ -129,10 +133,56 @@ public class AccessControlManager implements IAccessControlManager {
 				}
 			}
 		} else {
+			SocialRelationship newSR = new SocialRelationship();
+			newSR.setUser1Id(requesterId);
+			newSR.setUser2Id(userId);
+			
+			HashMap<Integer, Integer> rules = accessControlRepository.getAccessRulesOfUser(userId);
+			List<ConsensePermission> newPermissions = new ArrayList<>();
+			
+			for (Integer categoryId : rules.keySet()) {
+				switch(rules.get(categoryId)) {
+				case 0:
+					newPermissions.add(accessControlRepository.getPermissionOfCategory(categoryId));
+					break;
+				case 1:
+					ConsensePermission permission 		= accessControlRepository.getPermissionOfCategory(categoryId);
+					List<ContextItem> requesterContext = null;
+					List<ContextItem> profileOwnerContext = null;
+					if (permission.getName().equals(PermissionName.APPS.toString().toLowerCase())) {
+						filter.setType(ContextItem.TYPE_APPS);
+					} else if (permission.getName().equals(PermissionName.ACTIVITY.toString().toLowerCase())) {
+						filter.setType(ContextItem.TYPE_ACTIVITY);
+					} else if (permission.getName().equals(PermissionName.MUSIC.toString().toLowerCase())) {
+						filter.setType(ContextItem.TYPE_MUSIC);
+					}
+					requesterContext 	= contextManager.getContextItems(requesterId, filter);
+					profileOwnerContext = contextManager.getContextItems(userId, filter);
+					
+//					ContextRequirement conRequirement 	= contextManager.getContextRequirement(permission.getPermId());
+					
+					//Match context depending on context requirements
+					
+					
+					break;
+				case 2:
+					break;
+				}
+			}
+			// create social relationship
+			// store it in DB
+			// retrieve access rules of both users
+			// find similarities in context
+			// 
 			
 		}
 		
 		return null;
+	}
+
+	@Override
+	public void setUserAccessLevel(Integer userId, Integer categoryId, Integer lvl) {
+		accessControlRepository.setAccessRuleOfUser(userId, categoryId, lvl);
 	}
 
 	

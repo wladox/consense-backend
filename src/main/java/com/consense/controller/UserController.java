@@ -1,8 +1,6 @@
 package com.consense.controller;
 
-import java.awt.Image;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,12 +12,9 @@ import java.util.List;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,34 +32,30 @@ import com.consense.model.UserFeature;
 import com.consense.service.IAccessControlManager;
 import com.consense.service.IUserManager;
 
-
-
 @RestController("userController")
 @RequestMapping("/user")
 public class UserController {
 
 	private IUserManager userManager;
 	private IAccessControlManager accessControlManager;
-	
+
 	@Autowired
 	Environment env;
-	
+
 	@Autowired
 	ServletContext ctx;
 
-	
 	// wiring required components
 	@Autowired
 	public void setUserManager(IUserManager userManager) {
 		this.userManager = userManager;
 	}
-	
+
 	@Autowired
 	public void setAccessControlManager(IAccessControlManager accessControlManager) {
 		this.accessControlManager = accessControlManager;
 	}
 
-	
 	/**
 	 * 
 	 * @return list of all existing users
@@ -82,8 +73,10 @@ public class UserController {
 	 */
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	ResponseEntity<?> addUser(@RequestBody User user) {
-		userManager.addUser(user);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		int addedRows = userManager.addUser(user);
+		if (addedRows == 1)
+			return new ResponseEntity<>(HttpStatus.CREATED);
+		return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
 	}
 
 	/**
@@ -91,18 +84,18 @@ public class UserController {
 	 * @param user
 	 * @return
 	 */
-	@RequestMapping(value="/login", method = RequestMethod.POST)
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	ResponseEntity<String> login(@RequestBody User user) {
-		
+
 		User authenticatedUser = userManager.authenticateUser(user);
-		
+
 		if (authenticatedUser != null) {
 			List<UserFeature> features = userManager.getUserFeatures(authenticatedUser.getUserId());
-			
+
 			JSONObject userObject = new JSONObject();
-			userObject.put("userId", authenticatedUser);
+			userObject.put("userId", authenticatedUser.getUserId());
 			userObject.put("username", authenticatedUser.getName() + " " + authenticatedUser.getSurname());
-			
+
 			JSONArray featureArray = new JSONArray();
 			for (UserFeature feature : features) {
 				JSONObject featureObject = new JSONObject();
@@ -115,61 +108,68 @@ public class UserController {
 			userObject.put("features", featureArray);
 			return new ResponseEntity<String>(userObject.toString(), HttpStatus.OK);
 		}
-		
+
 		return new ResponseEntity<String>("", HttpStatus.OK);
 	}
-	
+
 	/**
 	 * 
 	 * this method adds new features to a user profile
 	 * 
-	 * @param userId 		id of the user who wants to add new feature
-	 * @param featureName 	feature name
-	 * @param catId 		categoryId to which the new feature belongs
+	 * @param userId
+	 *            id of the user who wants to add new feature
+	 * @param featureName
+	 *            feature name
+	 * @param catId
+	 *            categoryId to which the new feature belongs
 	 */
-	@RequestMapping(value = "/feature/add", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE) 
-	public void addUserFeature(	@RequestParam(value = "userId") Integer userId, 
-								@RequestParam(value="featureName") String featureName,
-								@RequestParam(value="categoryId") Integer catId) {
+	@RequestMapping(value = "/feature/add", method = RequestMethod.POST)
+	public ResponseEntity<?> addUserFeature(@RequestParam(value = "userId") Integer userId,
+			@RequestParam(value = "featureName") String featureName,
+			@RequestParam(value = "categoryId") Integer catId) {
 		UserFeature feature = new UserFeature();
 		feature.setFeatureName(featureName);
 		feature.setCategoryId(catId);
 		userManager.addUserFeature(userId, feature);
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
-	
+
 	/**
 	 * 
 	 * @param userId
 	 * @return
 	 */
-	@RequestMapping(value="/{userId}/profile", method = RequestMethod.GET)
-	public ResponseEntity<List<UserFeature>> getUserProfile(@PathVariable(value="userId") Integer userId) { 
+	@RequestMapping(value = "/{userId}/profile", method = RequestMethod.GET)
+	public ResponseEntity<List<UserFeature>> getUserProfile(@PathVariable(value = "userId") Integer userId) {
 		List<UserFeature> features = userManager.getUserFeatures(userId);
 		ResponseEntity<List<UserFeature>> response = new ResponseEntity<List<UserFeature>>(features, HttpStatus.OK);
 		return response;
 	}
-	
+
 	/**
 	 * 
-	 * this method returns user profile features of user2 based on access control rules
+	 * this method returns user profile features of user2 based on access
+	 * control rules
 	 * 
 	 * @param user1Id
 	 * @param user2Id
 	 * @return List of requested user features
 	 */
-	@RequestMapping(value="/profile", method = RequestMethod.POST)
-	public ResponseEntity<List<UserFeature>> getUserProfile(@RequestParam(value ="user1Id") Integer user1Id, @RequestParam(value="user2Id") Integer user2Id) { 
-		
+	@RequestMapping(value = "/profile", method = RequestMethod.POST)
+	public ResponseEntity<List<UserFeature>> getUserProfile(@RequestParam(value = "user1Id") Integer user1Id,
+			@RequestParam(value = "user2Id") Integer user2Id) {
+
 		// here access control should happen
-		
+
 		List<UserFeature> features = userManager.getUserFeatures(user1Id);
 		ResponseEntity<List<UserFeature>> response = new ResponseEntity<List<UserFeature>>(features, HttpStatus.OK);
 		return response;
 	}
-	
-	@RequestMapping(value = "/{userId}/imageupload",  method = RequestMethod.POST)
-	public ResponseEntity<String> handleFileUpload(@PathVariable Integer userId, @RequestParam("image") MultipartFile image){
-		
+
+	@RequestMapping(value = "/{userId}/imageupload", method = RequestMethod.POST)
+	public ResponseEntity<String> handleFileUpload(@PathVariable Integer userId,
+			@RequestParam("image") MultipartFile image) {
+
 		if (!image.isEmpty()) {
 			try {
 				byte[] bytes = image.getBytes();
@@ -187,14 +187,14 @@ public class UserController {
 				return new ResponseEntity<String>("You failed to upload => " + e.getMessage(), HttpStatus.BAD_REQUEST);
 			}
 		}
-		
+
 		return new ResponseEntity<String>("You failed to upload because the file was empty.", HttpStatus.BAD_GATEWAY);
-		
+
 	}
-	
-	@RequestMapping(value="/image", method = RequestMethod.POST)
-	public ResponseEntity<byte[]> getUserImage(@RequestParam(value="userId") Integer userId) {
-		
+
+	@RequestMapping(value = "/image", method = RequestMethod.POST)
+	public ResponseEntity<byte[]> getUserImage(@RequestParam(value = "userId") Integer userId) {
+
 		File image = userManager.getUserImage(userId);
 		if (image != null && image.exists()) {
 			try {
@@ -209,6 +209,14 @@ public class UserController {
 			}
 		}
 		return new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
-		
+
+	}
+
+	@RequestMapping(value = "/setaccess", method = RequestMethod.POST)
+	public void setUserAccessLvl(@RequestParam(value = "userId") Integer userId,
+			@RequestParam(value = "categoryId") Integer categoryId, 
+			@RequestParam(value = "lvl") Integer lvl) {
+
+		accessControlManager.setUserAccessLevel(userId, categoryId, lvl);
 	}
 }

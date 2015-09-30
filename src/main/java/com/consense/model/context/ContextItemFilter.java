@@ -2,19 +2,18 @@ package com.consense.model.context;
 
 import java.util.Date;
 
-import com.consense.model.context.ContextItem.ContextType;
 
 public class ContextItemFilter {
 
 	private Date from;
 	private Date to;
-	private ContextType type;
+	private int type;
 	
 	public ContextItemFilter() {
 		
 	}
 	
-	public ContextItemFilter(ContextType type, Date from, Date to) {
+	public ContextItemFilter(int type, Date from, Date to) {
 		this.from = from;
 		this.to = to;
 		this.type = type;
@@ -36,11 +35,11 @@ public class ContextItemFilter {
 		this.to = to;
 	}
 
-	public ContextType getType() {
+	public int getType() {
 		return type;
 	}
 
-	public void setType(ContextType type) {
+	public void setType(int type) {
 		this.type = type;
 	}
 	

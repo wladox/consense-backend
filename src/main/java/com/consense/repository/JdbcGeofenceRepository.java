@@ -114,6 +114,22 @@ public class JdbcGeofenceRepository implements GeofenceRepository {
 			}
 		});
 	}
+
+	@Override
+	public int addUser2Geofence(Integer userId, Integer geofenceId){
+
+		String sql = "INSERT INTO geo.user_geofence VALUES (?,?, false)";
+		return jdbcTemplate.update(sql, geofenceId, userId);
+		
+	}
+
+	@Override
+	public int removeUserFromGeofence(Integer userId, Integer geofenceId) {
+
+		String sql = "DELETE FROM geo.user_geofence WHERE user_id = ? AND geofence_id = ?";
+		return jdbcTemplate.update(sql, userId, geofenceId);
+		
+	}
 	
 	
 	

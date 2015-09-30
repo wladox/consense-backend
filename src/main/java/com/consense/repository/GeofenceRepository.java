@@ -12,5 +12,6 @@ public interface GeofenceRepository {
 	List<Geofence> findClosestNeighbours(double lat, double longg);
 	boolean isUserInGeofence(Integer userId, Integer geofenceId);
 	List<User> findAllUsersInGeofence(Integer geofenceId);
-	
+	int addUser2Geofence(Integer userId, Integer geofenceId);
+	int removeUserFromGeofence(Integer userId, Integer geofenceId);
 }

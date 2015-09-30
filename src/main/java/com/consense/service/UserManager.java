@@ -36,8 +36,8 @@ public class UserManager implements IUserManager {
 	}
 
 	@Override
-	public void addUser(User user) {
-		userRepository.addUser(user);
+	public int addUser(User user) {
+		return userRepository.addUser(user);
 
 	}
 
@@ -69,6 +69,11 @@ public class UserManager implements IUserManager {
 		if (user.getImage() != null && !user.getImage().equals(""))
 			return new File(user.getImage());
 		return null;
+	}
+
+	@Override
+	public List<User> findUsersInProximity(Integer userId) {
+		return userRepository.getUsersInGeofence(userId);
 	}
 
 }
