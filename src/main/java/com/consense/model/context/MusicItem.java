@@ -50,7 +50,7 @@ public class MusicItem extends ContextItem {
 	public static MusicItem getFromResult(ResultSet rs) {
 		MusicItem item = new MusicItem();
 		try {
-			item.setItemId(rs.getInt("context_state_id"));
+//			item.setItemId(rs.getInt("id"));
 			item.setType(rs.getInt("type"));
 			item.setCreated(rs.getTimestamp("created"));
 			item.setAlbum(rs.getString(COLUMN_ALBUM));

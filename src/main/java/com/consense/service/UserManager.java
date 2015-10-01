@@ -38,7 +38,6 @@ public class UserManager implements IUserManager {
 	@Override
 	public int addUser(User user) {
 		return userRepository.addUser(user);
-
 	}
 
 	@Override
@@ -48,7 +47,7 @@ public class UserManager implements IUserManager {
 
 	@Override
 	public List<UserFeature> getUserFeatures(Integer userId) {
-		List<UserFeature> userFeatures = userRepository.findFeaturesOfUser(userId);
+		List<UserFeature> userFeatures = userRepository.getOwnFeatures(userId);
 		return userFeatures;
 	}
 
@@ -74,6 +73,16 @@ public class UserManager implements IUserManager {
 	@Override
 	public List<User> findUsersInProximity(Integer userId) {
 		return userRepository.getUsersInGeofence(userId);
+	}
+
+	@Override
+	public List<UserFeature> getFeaturesOfUser(Integer requesterId, Integer profileOwnerId) {
+		return userRepository.getFeaturesOfUser(requesterId, profileOwnerId);
+	}
+
+	@Override
+	public User getUserById(Integer userId) {
+		return userRepository.findUserById(userId);
 	}
 
 }

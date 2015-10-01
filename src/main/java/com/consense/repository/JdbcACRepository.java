@@ -1,22 +1,31 @@
 package com.consense.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.consense.access.ConsensePermission;
 import com.consense.access.ConsenseRole;
+import com.consense.access.UserAssignment;
 import com.consense.model.SocialRelationship;
+import com.consense.model.User;
 
 @Repository
 public class JdbcACRepository implements ACRepository {
@@ -33,9 +42,9 @@ public class JdbcACRepository implements ACRepository {
 	@Override
 	public HashMap<Integer, Integer> getAccessRulesOfUser(Integer userId) {
 		
-		String sql = "SELECT * FROM network.user_access_rules WHERE user_id = userId";
+		String sql = "SELECT * FROM network.user_access_rules WHERE user_id = ?";
 		
-		jdbcTemplate.query(sql, new ResultSetExtractor<HashMap<Integer, Integer>>(){
+		return jdbcTemplate.query(sql, new ResultSetExtractor<HashMap<Integer, Integer>>(){
 
 			@Override
 			public HashMap<Integer, Integer> extractData(ResultSet rs) throws SQLException, DataAccessException {
@@ -51,51 +60,75 @@ public class JdbcACRepository implements ACRepository {
 				return accessRules;
 			}
 			
-		});
-		return null;
+		}, userId);
 	}
 
 	@Override
-	public void addRole(ConsenseRole role) {
+	public Integer addRole(ConsenseRole role) {
 		
-		String sql = "INSERT INTO network.role VALUES (?) RETURNING role_id";
-		int id = jdbcTemplate.update(sql, role.getRoleId());
+		KeyHolder keyHolder = new GeneratedKeyHolder();
 		
-		String sql2 = "INSERT INTO network.permission_assignment VALUES(?,?)";
+		
+		final String insertRole = "INSERT INTO network.role (name, enabled, activated) VALUES (null, 'true', 'true')";
+		jdbcTemplate.update(new PreparedStatementCreator() {
+	        public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+
+	            PreparedStatement ps = connection.prepareStatement(insertRole, Statement.RETURN_GENERATED_KEYS);
+	            return ps;
+	        }
+	    }, keyHolder);
+		
+		
+		Integer id = (Integer) keyHolder.getKeys().get("role_id");
+		System.out.println(id);
+		String addPermissions = "INSERT INTO network.permission_assignment VALUES(?,?);";
 		for (ConsensePermission p : role.getPermissions()) {
-			jdbcTemplate.update(sql2, role.getRoleId(), p.getPermId());
+			jdbcTemplate.update(addPermissions, id, p.getPermId());
 		}
 		
-	}
-
-	@Override
-	public void addUserAssignment(Integer userId, Integer roleId) {
-		// TODO Auto-generated method stub
+		return id;
 		
 	}
 
 	@Override
-	public List<Integer> getUserAssignments(Integer userId) {
+	public void addUserAssignment(Integer userId, Integer related_with, Integer roleId) {
 
-		String sql = "SELECT role_id FROM network.user_assignment WHERE user_id = ?";
+		String sql ="INSERT INTO network.user_assignment VALUES(?, ?, now(), ?)";
+		jdbcTemplate.update(sql, userId, related_with, roleId);
 		
-		jdbcTemplate.query(sql, new ResultSetExtractor<List<Integer>>() {
+	}
+	
+	@Override
+	public void updateUserAssignment(Integer userId, Integer related_with, Integer roleId) {
+
+		String sql ="UPDATE network.user_assignment SET role_id = ? WHERE user_id = ? and related_with = ?";
+		jdbcTemplate.update(sql, roleId, userId, related_with);
+	}
+
+	@Override
+	public UserAssignment getUserAssignment(Integer userId, Integer related_with) {
+
+		String sql = "SELECT user_id, related_with, created, role_id FROM network.user_assignment WHERE user_id = ? and related_with = ?";
+		
+		return jdbcTemplate.query(sql, new ResultSetExtractor<UserAssignment>() {
 
 			@Override
-			public List<Integer> extractData(ResultSet rs) throws SQLException, DataAccessException {
-				
-				List<Integer> roleIds  = new ArrayList<>();
-				
-				while(rs.next()) {
-					roleIds.add(rs.getInt("role_id"));
+			public UserAssignment extractData(ResultSet rs) throws SQLException, DataAccessException{
+
+				if (rs.next()) {
+					UserAssignment assignment = new UserAssignment();
+					assignment.setUserId(rs.getInt(1));
+					assignment.setRelatedWith(rs.getInt(2));
+					assignment.setCreated(rs.getDate(3));
+					assignment.setRoleId(rs.getInt(4));
+					return assignment;
 				}
 				
-				return roleIds;
+				return null;
+				
 			}
 			
-		}, userId); 
-		
-		return new ArrayList<Integer>();
+		}, userId, related_with); 
 	}
 
 	@Override
@@ -209,6 +242,155 @@ public class JdbcACRepository implements ACRepository {
 		String sql = "UPDATE network.user_access_rules SET access_level = ? WHERE user_id = ? AND category_id = ?";
 		jdbcTemplate.update(sql, lvl, userId, categoryId);
 		
+	}
+
+	@Override
+	public ConsenseRole getRole(Integer roleId) {
+		
+		String sql = "SELECT role_id, name, enabled, activated FROM network.role WHERE role_id = ?";
+		
+		return jdbcTemplate.query(sql, new ResultSetExtractor<ConsenseRole>(){
+
+			@Override
+			public ConsenseRole extractData(ResultSet rs) throws SQLException, DataAccessException {
+
+				if (rs.next()) {
+					ConsenseRole role = new ConsenseRole();
+					role.setRoleId(rs.getInt("role_id"));
+					role.setName(rs.getString("name"));
+					role.setEnabled(rs.getBoolean("enabled"));
+					role.setActivated(rs.getBoolean("activated"));
+					return role;
+				}
+				
+				return null;
+			}
+			
+		}, roleId);
+	}
+
+	@Override
+	public void revokeRolePermissions(Integer roleId) {
+
+		String sql = "DELETE from network.permission_assignment WHERE role_id = ?";
+		jdbcTemplate.update(sql, roleId);
+		
+	}
+
+	@Override
+	public void updatePermissionAssignment(ConsenseRole role) {
+
+		String sql = "INSERT INTO network.permission_assignment VALUES(?,?);";
+		for (ConsensePermission p : role.getPermissions()) {
+			jdbcTemplate.update(sql, role.getRoleId(), p.getPermId());
+		}
+		
+	}
+
+	@Override
+	public Integer updateRole(ConsenseRole role) {
+		
+		int affectedRows = 0;
+		String sql = "INSERT INTO network.permission_assignment VALUES(?,?);";
+		for (ConsensePermission p : role.getPermissions()) {
+			affectedRows += jdbcTemplate.update(sql, role.getRoleId(), p.getPermId());
+		}
+		
+		return affectedRows;
+	}
+
+	@Override
+	public List<Integer> getRoleIdsWithPermission(Integer permId) {
+
+		String sql = "SELECT role_id FROM network.permission_assignment WHERE permission_id = ?";
+		return jdbcTemplate.query(sql, new ResultSetExtractor<List<Integer>>(){
+
+			@Override
+			public List<Integer> extractData(ResultSet rs) throws SQLException, DataAccessException {
+
+				List<Integer> roleIds = new ArrayList<>();
+				while(rs.next()) {
+					roleIds.add(rs.getInt("role_id"));
+				}
+				
+				return roleIds;
+			}
+			
+		}, permId);
+	}
+
+	@Override
+	public void deactivateRoles(List<Integer> roleIds) {
+
+		String sql = "UPDATE network.role SET activated = 'false' WHERE role_id IN ("+ StringUtils.join(roleIds, ",") + ")";
+		jdbcTemplate.update(sql);
+		
+	}
+
+	@Override
+	public List<Integer> getConcernedRoleIds(Integer userId) {
+		
+		String sql = "SELECT role_id FROM network.user_assignment WHERE related_with = ?";
+		return jdbcTemplate.query(sql, new ResultSetExtractor<List<Integer>>(){
+
+			@Override
+			public List<Integer> extractData(ResultSet rs) throws SQLException, DataAccessException {
+
+				List<Integer> roleIds = new ArrayList<>();
+				while(rs.next()) {
+					roleIds.add(rs.getInt("role_id"));
+				}
+				
+				return roleIds;
+			}
+			
+		}, userId);
+		
+	}
+
+	@Override
+	public void disableRoles(List<Integer> roleIds) {
+		String sql = "UPDATE network.role SET enabled = 'false' WHERE role_id IN ("+ StringUtils.join(roleIds, ",") + ")";
+		jdbcTemplate.update(sql);
+		
+	}
+
+	@Override
+	public List<UserAssignment> getUserAssignments(Integer userId) {
+
+		String sql = "SELECT * FROM network.user_assignment WHERE user_id = ? OR related_with = ?";
+		return jdbcTemplate.query(sql, new ResultSetExtractor<List<UserAssignment>>(){
+
+			@Override
+			public List<UserAssignment> extractData(ResultSet rs) throws SQLException, DataAccessException {
+
+				List<UserAssignment> assignments = new ArrayList<>();
+				while(rs.next()) {
+					UserAssignment assignment = new UserAssignment();
+					assignment.setUserId(rs.getInt("user_id"));
+					assignment.setRelatedWith(rs.getInt("related_with"));
+					assignment.setCreated(rs.getDate("created"));
+					assignment.setRoleId(rs.getInt("role_id"));
+					assignments.add(assignment);
+				}
+				
+				return assignments;
+			}
+			
+		}, userId, userId);
+	}
+
+	@Override
+	public void enableRoles(List<Integer> roleIds) {
+		String sql = "UPDATE network.role SET enabled = true WHERE role_id IN("+StringUtils.join(roleIds, ",")+");";
+		jdbcTemplate.update(sql);
+		
+	}
+
+	@Override
+	public void activateRoles(List<Integer> roleIds) {
+		String sql = "UPDATE network.role SET activated = true WHERE role_id IN("+StringUtils.join(roleIds, ",")+");";
+		jdbcTemplate.update(sql);
 	}
 
 }

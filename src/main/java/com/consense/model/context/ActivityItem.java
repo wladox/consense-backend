@@ -39,7 +39,7 @@ public class ActivityItem extends ContextItem {
 		
 		ActivityItem item = new ActivityItem();
 		try {
-			item.setItemId(rs.getInt("context_state_id"));
+			//item.setItemId(rs.getInt("id"));
 			item.setType(rs.getInt("type"));
 			item.setCreated(rs.getTimestamp("created"));
 			item.setName(rs.getString(ActivityItem.COLUMN_NAME));

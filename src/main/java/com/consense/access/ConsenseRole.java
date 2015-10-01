@@ -21,6 +21,8 @@ public class ConsenseRole {
 	
 	private Integer roleId;
 	private String 	name;
+	private boolean enabled;
+	private boolean activated;
 	private List<ConsensePermission> permissions;
 	
 	public ConsenseRole() {}
@@ -37,6 +39,23 @@ public class ConsenseRole {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public boolean isActivated() {
+		return activated;
+	}
+
+	public void setActivated(boolean activated) {
+		this.activated = activated;
+	}
+	
 	public List<ConsensePermission> getPermissions() {
 		return permissions;
 	}

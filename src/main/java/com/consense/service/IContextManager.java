@@ -13,7 +13,7 @@ public interface IContextManager {
 	void addContext(ContextItem item);
 	void updateUserContext(Integer usedId, JSONArray context);
 	
-	List<ContextItem>	getContextItems(Integer userId, ContextItemFilter filter);
+	List<? extends ContextItem>	getContextItems(Integer userId, ContextItemFilter filter);
 	
 	
 }

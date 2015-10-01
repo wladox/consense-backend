@@ -136,12 +136,13 @@ public class JdbcUserRepository implements UserRepository {
 	}
 
 	@Override
-	public List<UserFeature> findFeaturesOfUser(Integer userId) {
+	public List<UserFeature> getOwnFeatures(Integer userId) {
 		
-		String sql = "SELECT DISTINCT f.id, f.name, f.cat_id, fc.name AS cat_name FROM network.feature f "
+		String sql = "SELECT DISTINCT f.id, f.name AS featurename, f.cat_id, fc.name AS category FROM network.feature f "
 				+ "JOIN network.user_feature uf on f.id = uf.feature_id "
 				+ "JOIN network.feature_category fc on f.cat_id = fc.id "
-				+ "JOIN network.user on uf.user_id = " + userId;
+				+ "JOIN network.user on uf.user_id = ?";
+		
 		return jdbcTemplate.query(sql, new ResultSetExtractor<List<UserFeature>>() {
 
 			@Override
@@ -150,14 +151,14 @@ public class JdbcUserRepository implements UserRepository {
 				while (rs.next()) {
 					UserFeature userFeature = new UserFeature();
 					userFeature.setFeatureId(rs.getInt(UserFeature.COLUMN_FEATURE_ID));
-					userFeature.setFeatureName(rs.getString(UserFeature.COLUMN_FEATURE_NAME));
+					userFeature.setFeatureName(rs.getString("featurename"));
 					userFeature.setCategoryId(rs.getInt(UserFeature.COLUMN_CATEGORY_ID));
-					userFeature.setCategoryName(rs.getString(UserFeature.COLUMN_CATEGORY_NAME));
+					userFeature.setCategoryName(rs.getString("category"));
 					features.add(userFeature);
 				}
 				return features;
 			}
-		});
+		}, userId);
 	}
 
 	@Override
@@ -228,6 +229,33 @@ public class JdbcUserRepository implements UserRepository {
 		}, userId, userId);
 		
 		return userList;
+	}
+
+	@Override
+	public List<UserFeature> getFeaturesOfUser(Integer requesterId, Integer ownerId) {
+		
+		String sql = "SELECT f.id, f.name AS featurename, fc.id AS cat_id, fc.name AS category FROM network.feature f, network.user_feature uf, network.feature_category fc "
+				+ "WHERE uf.user_id = ? AND f.id = uf.feature_id AND f.cat_id = fc.id AND fc.id = ANY(SELECT DISTINCT p.cat_id "
+				+ "FROM network.permission p, network.permission_assignment pa, network.role r "
+				+ "WHERE pa.permission_id = p.permission_id AND pa.role_id = (SELECT role_id FROM network.user_assignment WHERE user_id = ?))";
+		
+		return jdbcTemplate.query(sql, new ResultSetExtractor<List<UserFeature>>() {
+
+			@Override
+			public List<UserFeature> extractData(ResultSet rs) throws SQLException, DataAccessException {
+				List<UserFeature> features = new ArrayList<>();
+				while (rs.next()) {
+					UserFeature userFeature = new UserFeature();
+					userFeature.setFeatureId(rs.getInt(UserFeature.COLUMN_FEATURE_ID));
+					userFeature.setFeatureName(rs.getString("featurename"));
+					userFeature.setCategoryId(rs.getInt(UserFeature.COLUMN_CATEGORY_ID));
+					userFeature.setCategoryName(rs.getString("category"));
+					features.add(userFeature);
+				}
+				return features;
+			}
+		}, ownerId, requesterId);
+		
 	}
 	
 	

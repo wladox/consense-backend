@@ -19,6 +19,6 @@ public interface ContextRepository {
 	void addLocationItem(LocationItem item);
 	void addMusicItem(MusicItem item);
 	void addPedometerItem(PedometerItem item);
-	List<ContextItem> getContextOfUser(Integer userId, ContextItemFilter filter);
+	List<? extends ContextItem> getContextOfUser(Integer userId, ContextItemFilter filter);
 	
 }

@@ -60,7 +60,7 @@ public static final String TABLE_NAME = "state_location";
 	public static LocationItem getFromResult(ResultSet rs) {
 		LocationItem item = new LocationItem();
 		try {
-			item.setItemId(rs.getInt("context_state_id"));
+//			item.setItemId(rs.getInt("id"));
 			item.setType(rs.getInt("type"));
 			item.setCreated(rs.getTimestamp("created"));
 			item.setAccuracy(rs.getFloat(COLUMN_ACCURACY));

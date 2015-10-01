@@ -11,7 +11,6 @@ public class ContextItem {
 	public static final int TYPE_AUDIO = 5;
 	public static final int TYPE_PEDOMETER = 6;
 	
-	
 	public static final String COLUMN_ID 		= "id";
 	public static final String COLUMN_TYPE 		= "type";
 	public static final String COLUMN_USER_ID 	= "user_id";
@@ -26,28 +25,29 @@ public class ContextItem {
 		
 	}
 	
-//	public enum ContextType {
-//		
-//		ACTIVITY(1), APPS(2), LOCATION(3), MUSIC(4), AUDIO(5), PEDOMETER(6);
-//		
-//		private int id;
-//		
-//		private ContextType(int id) {
-//			this.id = id;
-//		}
-//		
-//		public int getId() {
-//			return id;
-//		}
-//
-//		public static String getValueById(int id) {
-//			for (ContextType ct : ContextType.values())	{
-//				if (ct.getId() == id)
-//					return ct.toString();
-//			}
-//			return "";
-//		}
-//	}
+	public enum ContextType {
+		
+		ACTIVITY(1), APPS(2), LOCATION(3), MUSIC(4), AUDIO(5), PEDOMETER(6);
+		
+		private int id;
+		
+		private ContextType(int id) {
+			this.id = id;
+		}
+		
+		public int getId() {
+			return id;
+		}
+
+		public static String getValueById(int id) {
+			for (ContextType ct : ContextType.values())	{
+				if (ct.getId() == id)
+					return ct.toString().toLowerCase();
+			}
+			return "";
+		}
+		
+	}
 	
 	public Integer getItemId() {
 		return itemId;

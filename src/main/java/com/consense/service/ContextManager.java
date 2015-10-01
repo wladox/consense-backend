@@ -54,7 +54,7 @@ public class ContextManager implements IContextManager{
 	}
 
 	@Override
-	public List<ContextItem> getContextItems(Integer userId, ContextItemFilter filter) {
+	public List<? extends ContextItem> getContextItems(Integer userId, ContextItemFilter filter) {
 		return contextRepository.getContextOfUser(userId, filter);
 	}
 

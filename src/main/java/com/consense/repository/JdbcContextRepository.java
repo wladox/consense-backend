@@ -17,6 +17,7 @@ import com.consense.model.context.ActivityItem;
 import com.consense.model.context.AppsItem;
 import com.consense.model.context.AudioItem;
 import com.consense.model.context.ContextItem;
+import com.consense.model.context.ContextItem.ContextType;
 import com.consense.model.context.ContextItemFilter;
 import com.consense.model.context.LocationItem;
 import com.consense.model.context.MusicItem;
@@ -94,41 +95,59 @@ public class JdbcContextRepository implements ContextRepository {
 	}
 
 	@Override
-	public List<ContextItem> getContextOfUser(Integer userId, ContextItemFilter filter) {
+	public List<? extends ContextItem> getContextOfUser(Integer userId, ContextItemFilter filter) {
 		final int type = filter.getType();
-		String sql = "SELECT * FROM context.state_"+ type + " WHERE user_id = ? AND type = ? AND created > ? AND created < ?";
-		return jdbcTemplate.query(sql, new ResultSetExtractor<List<ContextItem>>() {
+		String sql = "SELECT * FROM context.state_"+ ContextType.getValueById(type)  + " WHERE user_id = ? AND created > ? AND created < ? ORDER BY created DESC";
+		return jdbcTemplate.query(sql, new ResultSetExtractor<List<? extends ContextItem>>() {
 
 			@Override
-			public List<ContextItem> extractData(ResultSet rs) throws SQLException, DataAccessException {
-				List<ContextItem> items = new ArrayList<>();
-				while(rs.next()) {
-					switch (type) {
+			public List<? extends ContextItem> extractData(ResultSet rs) throws SQLException, DataAccessException {
+				
+				switch (type) {
+				
 					case ContextItem.TYPE_ACTIVITY:
-						items.add(ActivityItem.getFromResult(rs));
-						break;
+						
+						List<ActivityItem> activityItems = new ArrayList<>();
+						while(rs.next()) {
+							activityItems.add(ActivityItem.getFromResult(rs));
+						}
+						return activityItems;
+						
 					case ContextItem.TYPE_APPS:
-						items.add(AppsItem.getFromResult(rs));
+						
+						List<AppsItem> appsItems = new ArrayList<>();
+						while(rs.next()) {
+							appsItems.add(AppsItem.getFromResult(rs));
+							return appsItems; // we are only interested in the one latest sensed item 
+						}
 						break;
 					case ContextItem.TYPE_LOCATION:
-						items.add(LocationItem.getFromResult(rs));
-						break;
+						List<LocationItem> locationItems = new ArrayList<>();
+						while(rs.next()) {
+							locationItems.add(LocationItem.getFromResult(rs));
+						}
+						return locationItems;
 					case ContextItem.TYPE_MUSIC:
-						items.add(MusicItem.getFromResult(rs));
+						List<MusicItem> musicItems = new ArrayList<>();
+						while(rs.next()) {
+							musicItems.add(MusicItem.getFromResult(rs));
+						}
+						return musicItems;
+					default:
 						break;
+				}
+				
+				return null;
+				
 //					case 5:
 //						items.add(AudioItem.getFromResult(rs));
 //						break;
 //					case 6:
 //						items.add(PedometerItem.getFromResult(rs));
 //						break;
-					}
-					
-				}
-				return items;
 			}
 			
-		}, userId, type, filter.getFrom(), filter.getTo());
+		}, userId, filter.getFrom(), filter.getTo());
 	}
 
 }

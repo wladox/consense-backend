@@ -20,7 +20,8 @@ public interface UserRepository {
 	User findUserByName(String name);
 	User findUserByEmail(String email);
 	
-	List<UserFeature> findFeaturesOfUser(Integer userId);
+	List<UserFeature> getOwnFeatures(Integer userId);
+	List<UserFeature> getFeaturesOfUser(Integer requesterId, Integer ownerId);
 	
 	void updateUserFeature(UserFeature feature);
 	void addUserFeature(Integer userId, UserFeature feature);

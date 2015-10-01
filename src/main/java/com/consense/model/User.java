@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class User {
@@ -34,6 +36,7 @@ public class User {
 	private String	image;
 	private List<UserFeature> features;
 	
+	@JsonIgnore
 	private HashMap<Integer, Integer> accessRules;
 	
 	public User() {

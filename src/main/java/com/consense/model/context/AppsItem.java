@@ -31,7 +31,7 @@ public class AppsItem extends ContextItem {
 		
 		AppsItem item = new AppsItem();
 		try {
-			item.setItemId(rs.getInt("context_state_id"));
+//			item.setItemId(rs.getInt("id"));
 			item.setType(rs.getInt("type"));
 			item.setCreated(rs.getTimestamp("created"));
 			item.setNames(rs.getString(COLUMN_NAMES));

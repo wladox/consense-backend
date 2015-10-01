@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -156,13 +157,20 @@ public class UserController {
 	 * @return List of requested user features
 	 */
 	@RequestMapping(value = "/profile", method = RequestMethod.POST)
-	public ResponseEntity<List<UserFeature>> getUserProfile(@RequestParam(value = "user1Id") Integer user1Id,
-			@RequestParam(value = "user2Id") Integer user2Id) {
-
-		// here access control should happen
-
-		List<UserFeature> features = userManager.getUserFeatures(user1Id);
-		ResponseEntity<List<UserFeature>> response = new ResponseEntity<List<UserFeature>>(features, HttpStatus.OK);
+	public ResponseEntity<User> getUserProfile(
+			@RequestParam(value = "requesterId") Integer requesterId,
+			@RequestParam(value = "profileOwnerId") Integer profileOwnerId) {
+		
+		User user = userManager.getUserById(profileOwnerId);
+		List<UserFeature> features = accessControlManager.getUserProfile(requesterId, profileOwnerId);
+		user.setFeatures(features);
+		
+		ResponseEntity<User> response = null;
+		if (features != null) {
+			 response = new ResponseEntity<User>(user, HttpStatus.OK);
+		} else {
+			response = new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+		}
 		return response;
 	}
 
